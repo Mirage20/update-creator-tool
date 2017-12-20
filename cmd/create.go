@@ -136,6 +136,28 @@ func createUpdate(updateDirectoryPath, distributionPath string) {
 	}
 	logger.Debug(fmt.Sprintf("Descriptor Exists. Location %s", updateDescriptorPath))
 
+	// 2.1) Check whether the LICENSE.txt file exists and download the license if the LICENSE_URL
+	// environment variable is set.
+	updateLicenseTextPath := path.Join(updateDirectoryPath, constant.LICENSE_FILE)
+	exists, err = util.IsFileExists(updateLicenseTextPath)
+	logger.Debug(fmt.Sprintf("Checking '%s' file in %s", constant.LICENSE_FILE, updateDirectoryPath))
+	util.HandleErrorAndExit(err, fmt.Sprintf("Error occurred while reading the '%v'",
+		constant.LICENSE_FILE))
+	if !exists {
+		licenseUrl := os.Getenv(constant.ENV_LICENSE_URL)
+		logger.Debug(fmt.Sprintf(fmt.Sprintf("'%s' not found at '%s' directory.", constant.LICENSE_FILE,
+			updateDirectoryPath)))
+		if len(licenseUrl) != 0 {
+			logger.Debug(fmt.Sprintf(fmt.Sprintf("Environment varible '%s' is set. Getting file from: %s",
+				constant.ENV_LICENSE_URL, licenseUrl)))
+			err := util.DownloadFile(updateLicenseTextPath, licenseUrl)
+			if err != nil {
+				util.HandleErrorAndExit(err, fmt.Sprintf("Error occurred while getting the file '%v' " +
+					"from: %s.", constant.LICENSE_FILE, licenseUrl))
+			}
+		}
+	}
+
 	//3) Check whether the given distribution exists
 	exists, err = util.IsFileExists(distributionPath)
 	util.HandleErrorAndExit(err, fmt.Sprintf("Error occurred while checking '%s'", distributionPath))

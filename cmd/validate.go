@@ -39,9 +39,7 @@ var (
 	validateCmdLongDesc  = dedent.Dedent(`
 		This command will validate the given update zip. Files will be
 		matched against the given distribution. This will also validate
-		the structure of the update-descriptor.yaml file as well.
-		Please set LICENSE_MD5 environment variable to the expected
-		md5 value of the LICENSE.txt file.`)
+		the structure of the update-descriptor.yaml file as well.`)
 )
 
 // ValidateCmd represents the validate command
@@ -65,10 +63,6 @@ func initializeValidateCommand(cmd *cobra.Command, args []string) {
 	if len(args) != 2 {
 		util.HandleErrorAndExit(errors.New("Invalid number of argumants. Run 'wum-uc validate --help' to " +
 			"view help."))
-	}
-	// Check if LICENSE_MD5 environment is set and valid.
-	if len(os.Getenv("LICENSE_MD5")) == 0 {
-		util.HandleErrorAndExit(errors.New("Environment variable 'LICENSE_MD5' is not set."))
 	}
 	startValidation(args[0], args[1])
 }
@@ -297,11 +291,18 @@ func validateFile(file *zip.File, fileName, fullPath, updateName string) ([]byte
 	}
 	zippedFile.Close()
 	// Validate checksum of the LICENSE.txt file.
-	if fileName == constant.LICENSE_FILE {
+	if fileName == constant.LICENSE_FILE && len(os.Getenv(constant.ENV_LICENSE_URL)) != 0 {
+		licenseUrl := os.Getenv(constant.ENV_LICENSE_URL)
+		licenseMD5Url := licenseUrl + ".md5";
+		logger.Debug(fmt.Sprintf(fmt.Sprintf("Environment varible '%s' is set. Getting MD5 checksum from: %s",
+			constant.ENV_LICENSE_URL, licenseMD5Url)))
+		licenseMD5Bytes, err := util.GetContentFromUrl(licenseMD5Url)
+		util.HandleErrorAndExit(err, fmt.Sprintf("Error occurred while getting md5 from: %s.", licenseMD5Url))
 		logger.Debug(fmt.Sprintf("Checking MD5 of the '%s'", fileName))
+		expectedLicenseMD5Sum := string(licenseMD5Bytes);
+		expectedLicenseMD5Sum = strings.ToLower(expectedLicenseMD5Sum);
 		actualLicenseMD5Sum := fmt.Sprintf("%x", md5.Sum(data))
 		actualLicenseMD5Sum = strings.ToLower(actualLicenseMD5Sum)
-		expectedLicenseMD5Sum := os.Getenv("LICENSE_MD5")
 		if actualLicenseMD5Sum != expectedLicenseMD5Sum {
 			logger.Debug(fmt.Sprintf("MD5 checksum failed for the file '%s': " +
 				"Expected-'%s', Actual-'%s'", fileName, expectedLicenseMD5Sum,

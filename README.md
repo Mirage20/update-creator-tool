@@ -36,7 +36,11 @@ Optional Files -
 1. NOT_A_CONTRIBUTION.txt
 2. instructions.txt
 
-**Note:** You can generate the **update-descriptor.yaml** file using the **init** command as shown in the next section. You need to have the product(which you are creating the update for) distribution locally as well. This is used to compare files and create the proper file structure in the update zip.
+**Note 1:** You can generate the **update-descriptor.yaml** file using the **init** command as shown in the next section. You need to have the product(which you are creating the update for) distribution locally as well. This is used to compare files and create the proper file structure in the update zip.
+
+**Note 2:** If you do not have the correct license, the tool can download when creating the update. In order for the tool to download the license,  please set LICENSE_URL environment variable to the following URL.
+
+    https://staging-cdn-updates.private.wso2.com/wum/update/license/LICENSE.txt
 
 Some samples for the **UPDATE_LOCATION** directory is shown below.
 
@@ -129,7 +133,10 @@ If the **UPDATE_LOCATION** contained the update 0001, by running this command, y
 
 After we create a update, we might want to unzip it and add more detail to the **update-descriptor.yaml** like removed files. After we do these changes, we can use this validation command to verify that the file structure of the zip is is the same as the distribution. 
 
-The `LICENSE_MD5` environment variable should be set to the expected MD5 license checksum in order to validate the LICENSE.txt contents.
+Please set `LICENSE_URL` environment variable to the following URL if you want to validate the LICENSE.txt contents.
+
+    https://staging-cdn-updates.private.wso2.com/wum/update/license/LICENSE.txt
+
 
 ```bash
 wum-uc validate <update_loc> <dist_loc> [<flags>]

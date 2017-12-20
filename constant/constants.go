@@ -88,4 +88,7 @@ const (
 	JIRA_SUMMARY_DEFAULT = "ADD_JIRA_SUMMARY_HERE/GITHUB_ISSUE_SUMMARY"
 	DISTRIBUTION         = "Distribution"
 	UPDATE               = "Update"
+
+	// Environment variable names
+	ENV_LICENSE_URL = "LICENSE_URL"
 )
